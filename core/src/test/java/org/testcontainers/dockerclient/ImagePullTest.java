@@ -5,11 +5,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
+import org.testcontainers.utility.DockerImageName;
 
 @RunWith(Parameterized.class)
 public class ImagePullTest {
 
-    private String image;
+    private final String image;
 
     @Parameterized.Parameters(name = "{0}")
     public static String[] parameters() {
@@ -22,8 +23,9 @@ public class ImagePullTest {
             "gliderlabs/alpine:3.5",
             "gliderlabs/alpine@sha256:a19aa4a17a525c97e5a90a0c53a9f3329d2dc61b0a14df5447757a865671c085",
             "quay.io/testcontainers/ryuk:latest",
-            "quay.io/testcontainers/ryuk:0.2.2",
-            "quay.io/testcontainers/ryuk@sha256:4b606e54c4bba1af4fd814019d342e4664d51e28d3ba2d18d24406edbefd66da",
+            "quay.io/testcontainers/ryuk:0.2.3",
+            "quay.io/testcontainers/ryuk@sha256:bb5a635cac4bd96c93cc476969ce11dc56436238ec7cd028d0524462f4739dd9",
+//            "ibmcom/db2express-c", // Big image for testing with slow networks
         };
     }
 
@@ -33,7 +35,7 @@ public class ImagePullTest {
 
     @Test
     public void test() {
-        try (final GenericContainer container = new GenericContainer<>(image)
+        try (final GenericContainer<?> container = new GenericContainer<>(DockerImageName.parse(image))
             .withCommand("/bin/sh", "-c", "sleep 0")
             .withStartupCheckStrategy(new OneShotStartupCheckStrategy())) {
             container.start();

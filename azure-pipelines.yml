@@ -1,0 +1,34 @@
+jobs:
+
+- job: azure_pipeline_tests
+  steps:
+
+  # Run a minimal set of tests in normal Linux pipeline builds
+  - task: Gradle@2
+    condition: eq(variables['Agent.OS'], 'Linux')
+    displayName: Build & test (Linux - minimal core)
+    env:
+      AWS_ACCESS_KEY_ID: $(aws.accessKeyId)
+      AWS_SECRET_ACCESS_KEY: $(aws.secretAccessKey)
+    inputs:
+        gradleWrapperFile: 'gradlew'
+        jdkVersionOption: '1.11'
+        options: "--no-daemon --continue"
+        tasks: "clean testcontainers:test --tests GenericContainerRuleTest"
+        publishJUnitResults: true
+        testResultsFiles: '**/TEST-*.xml'
+
+  # Run all tests when running the Windows CI tests
+  - task: Gradle@2
+    condition: eq(variables['Agent.OS'], 'Windows_NT')
+    displayName: Build & test (Windows - all modules)
+    env:
+      AWS_ACCESS_KEY_ID: $(aws.accessKeyId)
+      AWS_SECRET_ACCESS_KEY: $(aws.secretAccessKey)
+    inputs:
+        gradleWrapperFile: 'gradlew'
+        jdkVersionOption: '1.11'
+        options: '--no-daemon --continue'
+        tasks: 'clean check'
+        publishJUnitResults: true
+        testResultsFiles: '**/TEST-*.xml'
